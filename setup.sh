@@ -1,7 +1,46 @@
 #!/bin/bash
 read -p 'Enter SubDomain [mail.example.com] : ' SUBDOMAIN
 read -p 'Enter RootDomain [example.com] : ' DOMAIN
-apt-get -o "DPkg::Options::=--force-confdef" install postfix courier-imap courier-pop squirrelmail opendkim opendkim-tools mailutils certbot letsencrypt -y
+apt-get install postfix courier-imap courier-pop squirrelmail opendkim opendkim-tools mailutils certbot letsencrypt -y
 certbot certonly -d $DOMAIN --standalone
+sed -i "s/127.0.1.1/127.0.1.1 $SUBDOMAIN $DOMAIN/g" /etc/hosts
+echo "$DOMAIN" > /etc/hostname
+hostname $DOMAIN
+if [ `grep -iRl "default" /etc/postfix/main.cf` ];then
+cp /etc/postfix/main.cf /etc/postfix/main.cf.bak
+fi
 
+echo 'smtpd_banner = $myhostname ESMTP $mail_name (Ubuntu)' > /etc/postfix/main.cf
+echo 'biff = no' >> /etc/postfix/main.cf
+echo 'append_dot_mydomain = no' >> /etc/postfix/main.cf
+echo 'readme_directory = no' >> /etc/postfix/main.cf
+echo "smtpd_tls_cert_file=/etc/letsencrypt/live/$DOMAIN/fullchain.pem" >> /etc/postfix/main.cf #CHANGE VARIABLE
+echo "smtpd_tls_key_file=/etc/letsencrypt/live/$DOMAIN/privkey.pem" >> /etc/postfix/main.cf #CHANGE VARIABLE
+echo 'smtpd_use_tls=yes' >> /etc/postfix/main.cf
+echo 'smtpd_tls_session_cache_database = btree:${data_directory}/smtpd_scache' >> /etc/postfix/main.cf
+echo 'smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache' >> /etc/postfix/main.cf
+echo 'smtpd_relay_restrictions = permit_mynetworks permit_sasl_authenticated defer_unauth_destination' >> /etc/postfix/main.cf
+echo "myhostname = $DOMAIN" >> /etc/postfix/main.cf #CHANGE VARIABLE
+echo 'alias_maps = hash:/etc/aliases' >> /etc/postfix/main.cf
+echo 'alias_database = hash:/etc/aliases' >> /etc/postfix/main.cf
+echo 'myorigin = /etc/mailname' >> /etc/postfix/main.cf
+echo "mydestination = $myhostname, $SUBDOMAIN, $DOMAIN, localhost" >> /etc/postfix/main.cf #CHANGE VARIABLE
+echo 'relayhost =' >> /etc/postfix/main.cf
+echo 'mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128' >> /etc/postfix/main.cf
+echo 'mailbox_size_limit = 0' >> /etc/postfix/main.cf
+echo 'recipient_delimiter = +' >> /etc/postfix/main.cf
+echo 'inet_interfaces = all' >> /etc/postfix/main.cf
+echo 'inet_protocols = all' >> /etc/postfix/main.cf
+echo 'home_mailbox = Maildir/' >> /etc/postfix/main.cf
+echo 'smtp_sasl_auth_enable = yes' >> /etc/postfix/main.cf
+echo 'smtp_sasl_security_options = noanonymous' >> /etc/postfix/main.cf
+echo 'smtp_sasl_password_maps = hash:/etc/postfix/sasl/sasl_passwd' >> /etc/postfix/main.cf
+echo 'smtp_tls_security_level = encrypt' >> /etc/postfix/main.cf
+echo 'smtp_tls_CAfile = /etc/ssl/certs/ca-certificates.crt' >> /etc/postfix/main.cf
+echo 'milter_protocol = 2' >> /etc/postfix/main.cf
+echo 'milter_default_action = accept' >> /etc/postfix/main.cf
+echo 'smtpd_milters = inet:localhost:12301' >> /etc/postfix/main.cf
+echo 'non_smtpd_milters = inet:localhost:12301' >> /etc/postfix/main.cf
+
+mkdir -p /etc/opendkim
 
