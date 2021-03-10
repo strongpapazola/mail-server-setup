@@ -1,6 +1,7 @@
 #!/bin/bash
 read -p 'Enter SubDomain [mail.example.com] : ' SUBDOMAIN
 read -p 'Enter RootDomain [example.com] : ' DOMAIN
+read -p 'Enter Selector [key001] : ' SELECTOR
 apt-get install postfix courier-imap courier-pop squirrelmail opendkim opendkim-tools mailutils certbot letsencrypt -y
 certbot certonly -d $DOMAIN --standalone
 sed -i "s/127.0.1.1/127.0.1.1 $SUBDOMAIN $DOMAIN/g" /etc/hosts
@@ -41,6 +42,44 @@ echo 'milter_protocol = 2' >> /etc/postfix/main.cf
 echo 'milter_default_action = accept' >> /etc/postfix/main.cf
 echo 'smtpd_milters = inet:localhost:12301' >> /etc/postfix/main.cf
 echo 'non_smtpd_milters = inet:localhost:12301' >> /etc/postfix/main.cf
+maildirmake.courier /etc/skel/Maildir
 
-mkdir -p /etc/opendkim
 
+echo "AutoRestart             Yes" >> /etc/opendkim.conf
+echo "AutoRestartRate         10/1h" >> /etc/opendkim.conf
+echo "UMask                   002" >> /etc/opendkim.conf
+echo "Syslog                  yes" >> /etc/opendkim.conf
+echo "SyslogSuccess           Yes" >> /etc/opendkim.conf
+echo "LogWhy                  Yes" >> /etc/opendkim.conf
+echo "Canonicalization        relaxed/simple" >> /etc/opendkim.conf
+echo "ExternalIgnoreList      refile:/etc/opendkim/TrustedHosts" >> /etc/opendkim.conf
+echo "InternalHosts           refile:/etc/opendkim/TrustedHosts" >> /etc/opendkim.conf
+echo "KeyTable                refile:/etc/opendkim/KeyTable" >> /etc/opendkim.conf
+echo "SigningTable            refile:/etc/opendkim/SigningTable" >> /etc/opendkim.conf
+echo "Mode                    sv" >> /etc/opendkim.conf
+echo "PidFile                 /var/run/opendkim/opendkim.pid" >> /etc/opendkim.conf
+echo "SignatureAlgorithm      rsa-sha256" >> /etc/opendkim.conf
+echo "UserID                  opendkim:opendkim" >> /etc/opendkim.conf
+echo "Socket                  inet:12301@localhost" >> /etc/opendkim.conf
+
+sed -i 's/SOCKET="local:/var/run/opendkim/opendkim.sock"/#SOCKET="local:/var/run/opendkim/opendkim.sock"/g' /etc/default/opendkim
+echo 'SOCKET="inet:12301@localhost"' >> /etc/default/opendkim
+
+sudo mkdir -p /etc/opendkim
+sudo mkdir -p /etc/opendkim/keys
+
+echo "$DOMAIN info:1nf0" > /etc/postfix/sasl/sasl_passwd
+postmap /etc/postfix/sasl/sasl_passwd
+
+echo "127.0.0.1" > /etc/opendkim/TrustedHosts
+echo "localhost" >> /etc/opendkim/TrustedHosts
+echo "*.$DOMAIN" >> /etc/opendkim/TrustedHosts
+echo "$SELECTOR._domainkey.$DOMAIN $DOMAIN:$SELECTOR:/etc/opendkim/keys/$DOMAIN/$SELECTOR.private" > /etc/opendkim/KeyTable
+
+echo "*@$DOMAIN $SELECTOR._domainkey.$DOMAIN" > /etc/opendkim/SigningTable
+
+mkdir /etc/opendkim/keys/$DOMAIN
+pushd /etc/opendkim/keys/$DOMAIN
+opendkim-genkey -s $SELECTOR -d $DOMAIN
+chown opendkim:opendkim *.private
+cat key001.txt
