@@ -15,8 +15,10 @@ echo 'smtpd_banner = $myhostname ESMTP $mail_name (Ubuntu)' > /etc/postfix/main.
 echo 'biff = no' >> /etc/postfix/main.cf
 echo 'append_dot_mydomain = no' >> /etc/postfix/main.cf
 echo 'readme_directory = no' >> /etc/postfix/main.cf
+#--- CHANGED VALUE ---#
 echo "smtpd_tls_cert_file=/etc/letsencrypt/live/$DOMAIN/fullchain.pem" >> /etc/postfix/main.cf #CHANGE VARIABLE
 echo "smtpd_tls_key_file=/etc/letsencrypt/live/$DOMAIN/privkey.pem" >> /etc/postfix/main.cf #CHANGE VARIABLE
+#--- CHANGED VALUE ---#
 echo 'smtpd_use_tls=yes' >> /etc/postfix/main.cf
 echo 'smtpd_tls_session_cache_database = btree:${data_directory}/smtpd_scache' >> /etc/postfix/main.cf
 echo 'smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache' >> /etc/postfix/main.cf
@@ -32,6 +34,7 @@ echo 'mailbox_size_limit = 0' >> /etc/postfix/main.cf
 echo 'recipient_delimiter = +' >> /etc/postfix/main.cf
 echo 'inet_interfaces = all' >> /etc/postfix/main.cf
 echo 'inet_protocols = all' >> /etc/postfix/main.cf
+#--- CHANGED VALUE ---#
 echo 'home_mailbox = Maildir/' >> /etc/postfix/main.cf
 echo 'smtp_sasl_auth_enable = yes' >> /etc/postfix/main.cf
 echo 'smtp_sasl_security_options = noanonymous' >> /etc/postfix/main.cf
@@ -42,6 +45,7 @@ echo 'milter_protocol = 2' >> /etc/postfix/main.cf
 echo 'milter_default_action = accept' >> /etc/postfix/main.cf
 echo 'smtpd_milters = inet:localhost:12301' >> /etc/postfix/main.cf
 echo 'non_smtpd_milters = inet:localhost:12301' >> /etc/postfix/main.cf
+#--- CHANGED VALUE ---#
 maildirmake.courier /etc/skel/Maildir
 
 
