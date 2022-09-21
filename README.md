@@ -45,7 +45,7 @@ lunak.id.	1	IN	MX	10 mail.lunak.id.
 ;; TXT Records
 _dmarc.lunak.id.	1	IN	TXT	"v=DMARC1; p=reject; sp=reject; adkim=s; aspf=s;"
 key001._domainkey.lunak.id.	1	IN	TXT	"v=DKIM1;p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtFkgBWv+21C2ApCjKuwJuorO0M7Pi3ZzK1p7jMzFw2UsJz/ULHs2igQa5HNEmlLohAxAN6/nVtdzb/+qyNUmNKW6sqgns2HqDPzNI5OTLqEbc4XLALeZ3IClTEmBzGRkrtrwf9i09H/XZZLH7xef3wHGERXrZaJJ7VIX/Zbdh0/JjWSy3bXPAbCt5QBLghtW5Iowniy3v+HMOGXRwG+rxVPjI54qzREXrbBEjY2sWKvu12qxCg/dfMBgkyxjYYhJiFUgHk1YBFtbyVLTT1aGNtZKfkmWXM4KipjPNs69lBZVQ7K4IVMKNbi2L7uN6cqVJqLzGMBdU6uNQm9QazjeuwIDAQAB"
-```
-
 
 lunak.id.	1	IN	TXT	"v=spf1 a mx ip4:203.194.113.155 include:_spf.google.com ~all"
+```
+
