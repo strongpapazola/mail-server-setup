@@ -66,8 +66,8 @@ echo "SignatureAlgorithm      rsa-sha256" >> /etc/opendkim.conf
 echo "UserID                  opendkim:opendkim" >> /etc/opendkim.conf
 echo "Socket                  inet:12301@localhost" >> /etc/opendkim.conf
 
-sed -i 's/SOCKET="local:/var/run/opendkim/opendkim.sock"/#SOCKET="local:/var/run/opendkim/opendkim.sock"/g' /etc/default/opendkim
-echo 'SOCKET="inet:12301@localhost"' >> /etc/default/opendkim
+#sed -i 's/SOCKET="local:/var/run/opendkim/opendkim.sock"/#SOCKET="local:/var/run/opendkim/opendkim.sock"/g' /etc/default/opendkim
+echo 'SOCKET="inet:12301@localhost"' > /etc/default/opendkim #REPLACE INSTEAD
 
 sudo mkdir -p /etc/opendkim
 sudo mkdir -p /etc/opendkim/keys
