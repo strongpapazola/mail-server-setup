@@ -1,7 +1,8 @@
 # mail-server-setup
 Run Setup For All
 
-#DNS Setting (Important)
+# DNS Setting (Important)
+
 ```
 ;;
 ;; Domain:     lunak.id.
