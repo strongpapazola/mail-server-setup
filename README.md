@@ -49,3 +49,22 @@ key001._domainkey.lunak.id.	1	IN	TXT	"v=DKIM1;p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A
 lunak.id.	1	IN	TXT	"v=spf1 a mx ip4:203.194.113.155 include:_spf.google.com ~all"
 ```
 
+# Test Mail Server Using Telnet
+```
+telnet mail.lunak.id 25
+
+ehlo mail.lunak.id
+mail from: root@lunak.id
+rcpt to: strongpapazola@gmail.com
+data
+Subject: Dependabots from root gaming
+halo
+.
+
+mail from: root@lunak.id
+rcpt to: info@lunak.id
+data
+Subject: Dependabots from root gaming
+halo
+.
+```
