@@ -1,6 +1,36 @@
 # SETUP MAIL SERVER CAN SEND TO GMAIL WITH OPENDKIM
 The requirement for us to be able to send email messages safely is to setup DKIM and SPF
 
+# RESEARCH SUCCESS SENDING EMAIL
+you can install docker and pull the image
+```
+docker pull strongpapazola/mail_server:v1
+```
+and
+```
+docker run -it --rm -p 25:25 strongpapazola/mail_server:v1 bash
+```
+then you can inspect file config
+```
+#FILE CONFIGURED
+/etc/hosts
+/etc/hostname
+/etc/postfix/main.cf
+/etc/opendkim.conf
+/etc/default/opendkim
+
+sudo mkdir -p /etc/opendkim
+sudo mkdir -p /etc/opendkim/keys
+
+/etc/postfix/sasl/sasl_passwd
+
+/etc/opendkim/TrustedHosts
+/etc/opendkim/KeyTable
+/etc/opendkim/SigningTable
+
+mkdir /etc/opendkim/keys/$DOMAIN
+```
+
 # DNS Setting (Important)
 
 ```
