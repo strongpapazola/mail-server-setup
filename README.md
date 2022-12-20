@@ -1,5 +1,5 @@
-# mail-server-setup
-Run Setup For All
+# SETUP MAIL SERVER CAN SEND TO GMAIL WITH OPENDKIM
+The requirement for us to be able to send email messages safely is to setup DKIM and SPF
 
 # DNS Setting (Important)
 
@@ -68,3 +68,5 @@ Subject: Dependabots from root gaming
 halo
 .
 ```
+
+
