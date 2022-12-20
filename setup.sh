@@ -86,4 +86,4 @@ mkdir /etc/opendkim/keys/$DOMAIN
 pushd /etc/opendkim/keys/$DOMAIN
 opendkim-genkey -s $SELECTOR -d $DOMAIN
 chown opendkim:opendkim *.private
-cat key001.txt
+cat $SELECTOR.txt
