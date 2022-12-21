@@ -9,9 +9,9 @@ sed -i "s/127.0.1.1/127.0.1.1 $DOMAIN/g" /etc/hosts
 echo "$DOMAIN" > /etc/hostname
 hostname $DOMAIN
 
-if [ `grep -iRl "default" /etc/postfix/main.cf` ];then
-cp /etc/postfix/main.cf /etc/postfix/main.cf.bak
-fi
+#if [ `grep -iRl "default" /etc/postfix/main.cf` ];then
+cp /etc/postfix/main.cf "/etc/postfix/main.cf.$(date)"
+#fi
 
 echo 'smtpd_banner = $myhostname ESMTP $mail_name (Ubuntu)' > /etc/postfix/main.cf
 echo 'biff = no' >> /etc/postfix/main.cf
@@ -50,10 +50,14 @@ echo 'milter_default_action = accept' >> /etc/postfix/main.cf
 echo 'smtpd_milters = inet:localhost:12301' >> /etc/postfix/main.cf
 echo 'non_smtpd_milters = inet:localhost:12301' >> /etc/postfix/main.cf
 
+echo "$DOMAIN info:1nf0" > /etc/postfix/sasl/sasl_passwd
+postmap /etc/postfix/sasl/sasl_passwd
+
 #--- CHANGED VALUE ---#
 maildirmake.courier /etc/skel/Maildir
 
-echo "AutoRestart             Yes" >> /etc/opendkim.conf
+cp /etc/opendkim.conf "/etc/opendkim.conf.$(date)"
+echo "AutoRestart             Yes" > /etc/opendkim.conf
 echo "AutoRestartRate         10/1h" >> /etc/opendkim.conf
 echo "UMask                   002" >> /etc/opendkim.conf
 echo "Syslog                  yes" >> /etc/opendkim.conf
@@ -73,24 +77,19 @@ echo "Socket                  inet:12301@localhost" >> /etc/opendkim.conf
 #sed -i 's/SOCKET="local:/var/run/opendkim/opendkim.sock"/#SOCKET="local:/var/run/opendkim/opendkim.sock"/g' /etc/default/opendkim
 echo 'SOCKET="inet:12301@localhost"' > /etc/default/opendkim #REPLACE INSTEAD
 
-sudo mkdir -p /etc/opendkim
-sudo mkdir -p /etc/opendkim/keys
-
-echo "$DOMAIN info:1nf0" > /etc/postfix/sasl/sasl_passwd
-postmap /etc/postfix/sasl/sasl_passwd
+mkdir -p /etc/opendkim
+mkdir -p /etc/opendkim/keys
 
 echo "127.0.0.1" > /etc/opendkim/TrustedHosts
 echo "localhost" >> /etc/opendkim/TrustedHosts
 echo "*.$DOMAIN" >> /etc/opendkim/TrustedHosts
 echo "$SELECTOR._domainkey.$DOMAIN $DOMAIN:$SELECTOR:/etc/opendkim/keys/$DOMAIN/$SELECTOR.private" > /etc/opendkim/KeyTable
-
 echo "*@$DOMAIN $SELECTOR._domainkey.$DOMAIN" > /etc/opendkim/SigningTable
 
 mkdir /etc/opendkim/keys/$DOMAIN
 pushd /etc/opendkim/keys/$DOMAIN
 opendkim-genkey -b 1024 -s $SELECTOR -d $DOMAIN
 chown opendkim:opendkim *.private
-cat $SELECTOR.txt
 
 service opendkim restart
 service postfix restart
@@ -98,3 +97,5 @@ service courier-imap restart
 service courier-pop restart
 
 
+echo '[*] ============= Please Add This Line To Yout Domain As TXT =============='
+cat $SELECTOR.txt
