@@ -1,12 +1,14 @@
 #!/bin/bash
-read -p 'Enter SubDomain [mail.example.com] : ' SUBDOMAIN
 read -p 'Enter RootDomain [example.com] : ' DOMAIN
 read -p 'Enter Selector [key001] : ' SELECTOR
-apt-get install postfix courier-imap courier-pop squirrelmail opendkim opendkim-tools mailutils certbot letsencrypt -y
-certbot certonly -d $DOMAIN --standalone
-sed -i "s/127.0.1.1/127.0.1.1 $SUBDOMAIN $DOMAIN/g" /etc/hosts
+apt update
+#apt-get install postfix courier-imap courier-pop opendkim opendkim-tools mailutils certbot letsencrypt -y
+apt-get install postfix courier-imap courier-pop opendkim opendkim-tools mailutils -y
+#certbot certonly -d $DOMAIN --standalone
+sed -i "s/127.0.1.1/127.0.1.1 $DOMAIN/g" /etc/hosts
 echo "$DOMAIN" > /etc/hostname
 hostname $DOMAIN
+
 if [ `grep -iRl "default" /etc/postfix/main.cf` ];then
 cp /etc/postfix/main.cf /etc/postfix/main.cf.bak
 fi
@@ -16,8 +18,10 @@ echo 'biff = no' >> /etc/postfix/main.cf
 echo 'append_dot_mydomain = no' >> /etc/postfix/main.cf
 echo 'readme_directory = no' >> /etc/postfix/main.cf
 #--- CHANGED VALUE ---#
-echo "smtpd_tls_cert_file=/etc/letsencrypt/live/$DOMAIN/fullchain.pem" >> /etc/postfix/main.cf #CHANGE VARIABLE
-echo "smtpd_tls_key_file=/etc/letsencrypt/live/$DOMAIN/privkey.pem" >> /etc/postfix/main.cf #CHANGE VARIABLE
+#echo "smtpd_tls_cert_file=/etc/letsencrypt/live/$DOMAIN/fullchain.pem" >> /etc/postfix/main.cf #CHANGE VARIABLE
+#echo "smtpd_tls_key_file=/etc/letsencrypt/live/$DOMAIN/privkey.pem" >> /etc/postfix/main.cf #CHANGE VARIABLE
+echo "smtpd_tls_cert_file=smtpd_tls_cert_file=/etc/ssl/certs/ssl-cert-snakeoil.pem" >> /etc/postfix/main.cf #CHANGE VARIABLE
+echo "smtpd_tls_key_file=smtpd_tls_key_file=/etc/ssl/private/ssl-cert-snakeoil.key" >> /etc/postfix/main.cf #CHANGE VARIABLE
 #--- CHANGED VALUE ---#
 echo 'smtpd_use_tls=yes' >> /etc/postfix/main.cf
 echo 'smtpd_tls_session_cache_database = btree:${data_directory}/smtpd_scache' >> /etc/postfix/main.cf
@@ -27,9 +31,9 @@ echo "myhostname = $DOMAIN" >> /etc/postfix/main.cf #CHANGE VARIABLE
 echo 'alias_maps = hash:/etc/aliases' >> /etc/postfix/main.cf
 echo 'alias_database = hash:/etc/aliases' >> /etc/postfix/main.cf
 echo 'myorigin = /etc/mailname' >> /etc/postfix/main.cf
-echo "mydestination = $myhostname, $SUBDOMAIN, $DOMAIN, localhost" >> /etc/postfix/main.cf #CHANGE VARIABLE
+echo "mydestination = $myhostname, $DOMAIN, localhost" >> /etc/postfix/main.cf #CHANGE VARIABLE
 echo 'relayhost =' >> /etc/postfix/main.cf
-echo 'mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128' >> /etc/postfix/main.cf
+echo 'mynetworks = 0.0.0.0/0 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128' >> /etc/postfix/main.cf
 echo 'mailbox_size_limit = 0' >> /etc/postfix/main.cf
 echo 'recipient_delimiter = +' >> /etc/postfix/main.cf
 echo 'inet_interfaces = all' >> /etc/postfix/main.cf
@@ -45,9 +49,9 @@ echo 'milter_protocol = 2' >> /etc/postfix/main.cf
 echo 'milter_default_action = accept' >> /etc/postfix/main.cf
 echo 'smtpd_milters = inet:localhost:12301' >> /etc/postfix/main.cf
 echo 'non_smtpd_milters = inet:localhost:12301' >> /etc/postfix/main.cf
+
 #--- CHANGED VALUE ---#
 maildirmake.courier /etc/skel/Maildir
-
 
 echo "AutoRestart             Yes" >> /etc/opendkim.conf
 echo "AutoRestartRate         10/1h" >> /etc/opendkim.conf
@@ -84,6 +88,13 @@ echo "*@$DOMAIN $SELECTOR._domainkey.$DOMAIN" > /etc/opendkim/SigningTable
 
 mkdir /etc/opendkim/keys/$DOMAIN
 pushd /etc/opendkim/keys/$DOMAIN
-opendkim-genkey -s $SELECTOR -d $DOMAIN
+opendkim-genkey -b 1024 -s $SELECTOR -d $DOMAIN
 chown opendkim:opendkim *.private
 cat $SELECTOR.txt
+
+service opendkim restart
+service postfix restart
+service courier-imap restart
+service courier-pop restart
+
+
