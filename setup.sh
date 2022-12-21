@@ -31,7 +31,8 @@ echo "myhostname = $DOMAIN" >> /etc/postfix/main.cf #CHANGE VARIABLE
 echo 'alias_maps = hash:/etc/aliases' >> /etc/postfix/main.cf
 echo 'alias_database = hash:/etc/aliases' >> /etc/postfix/main.cf
 echo 'myorigin = /etc/mailname' >> /etc/postfix/main.cf
-echo "mydestination = $myhostname, $DOMAIN, localhost" >> /etc/postfix/main.cf #CHANGE VARIABLE
+#echo "mydestination = $myhostname, $DOMAIN, localhost" >> /etc/postfix/main.cf #CHANGE VARIABLE
+echo "mydestination = $DOMAIN, localhost" >> /etc/postfix/main.cf #CHANGE VARIABLE
 echo 'relayhost =' >> /etc/postfix/main.cf
 echo 'mynetworks = 0.0.0.0/0 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128' >> /etc/postfix/main.cf
 echo 'mailbox_size_limit = 0' >> /etc/postfix/main.cf
@@ -91,11 +92,17 @@ pushd /etc/opendkim/keys/$DOMAIN
 opendkim-genkey -b 1024 -s $SELECTOR -d $DOMAIN
 chown opendkim:opendkim *.private
 
-service opendkim restart
+kill -9 $(ps aux | grep opendkim | awk '{print $2}')
+/usr/sbin/opendkim &
 service postfix restart
 service courier-imap restart
 service courier-pop restart
+service courier-authdaemon restart
 
+sed -i "s/lunak.id/$DOMAIN/g" /var/www/html/config/config.php
 
 echo '[*] ============= Please Add This Line To Yout Domain As TXT =============='
 cat $SELECTOR.txt
+
+echo '[*] ============= Please Setup User "admin" =============='
+adduser admin
