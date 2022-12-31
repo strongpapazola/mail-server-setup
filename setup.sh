@@ -113,3 +113,4 @@ cat $SELECTOR.txt
 
 echo '[*] ============= Please Setup User "admin" =============='
 adduser admin
+echo '[*] ============= Dont Forget To change app.py =============='
