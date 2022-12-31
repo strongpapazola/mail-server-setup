@@ -5,13 +5,20 @@ apt update
 #apt-get install postfix courier-imap courier-pop opendkim opendkim-tools mailutils certbot letsencrypt -y
 apt-get install postfix courier-imap courier-pop opendkim opendkim-tools mailutils -y
 #certbot certonly -d $DOMAIN --standalone
-sed -i "s/127.0.1.1/127.0.1.1 $DOMAIN/g" /etc/hosts
-echo "$DOMAIN" > /etc/hostname
-hostname $DOMAIN
+#sed -i "s/127.0.1.1/127.0.1.1 $DOMAIN/g" /etc/hosts
+#echo "$DOMAIN" > /etc/hostname
+#hostname $DOMAIN
 
 #if [ `grep -iRl "default" /etc/postfix/main.cf` ];then
 cp /etc/postfix/main.cf "/etc/postfix/main.cf.$(date)"
 #fi
+
+kill -9 $(ps aux | grep opendkim | awk '{print $2}')
+#/usr/sbin/opendkim &
+service postfix stop
+service courier-imap stop
+service courier-pop stop
+service courier-authdaemon stop
 
 echo 'smtpd_banner = $myhostname ESMTP $mail_name (Ubuntu)' > /etc/postfix/main.cf
 echo 'biff = no' >> /etc/postfix/main.cf
